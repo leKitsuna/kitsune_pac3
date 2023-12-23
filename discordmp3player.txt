@@ -1,0 +1,44 @@
+--@name DiscordMP3Player
+--@author SF_jdc
+--@client
+//https://cdn.discordapp.com/attachments/861313589531639811/1101403108862603304/bddd1bc0a1b16a54.mp3 -- heiteri
+//https://cdn.discordapp.com/attachments/861313589531639811/1101030962193780826/serega_talant_afronegri.mp3 -- americanci
+//https://cdn.discordapp.com/attachments/861313589531639811/1100311496703094876/serega_talant_shizoid.mp3 -- shiza
+//https://cdn.discordapp.com/attachments/861313589531639811/1099984033544413215/zxcursed_-_mana_break.mp3 -- mama break
+//https://cdn.discordapp.com/attachments/861313589531639811/1101403109340741762/9cbcd754d0691caa.mp3 -- thief
+//https://cdn.discordapp.com/attachments/861313589531639811/1101403109776965692/-_.mp3 -- babka
+//https://cdn.discordapp.com/attachments/861313589531639811/1101449219799261255/fairytales.mp3 -- drill 
+//https://cdn.discordapp.com/attachments/861313589531639811/1101696835971711067/roomba.mp3 -- roomba
+//https://cdn.discordapp.com/attachments/861313589531639811/1110123574389383168/myLeg.mp3 -- leg (serega)
+local music = nil
+local url = "https://cdn.discordapp.com/attachments/861313589531639811/1101030962193780826/serega_talant_afronegri.mp3"
+local vol = 1
+local function play(object)
+    object:setPos(chip():getPos())
+    object:setVolume(vol)
+    object:play()
+    music = object
+end
+bass.loadURL(url,"3d noblock",function(m) play(m,m:getLength())end)
+
+hook.add("Think","while"..owner():getSteamID64(),function()
+    if music == nil  then return end
+    if !music:isValid() then return end
+    music:setPos(owner():getPos())
+end)
+hook.add("PlayerChat","discordMP3PlayerChat"..owner():getSteamID64(),function(ply,txt)
+    if ply ~= owner() then return end
+    if txt == "!skip" then music:stop() return end
+    if txt == "!pause" or txt == "!stop" then music:pause() return end
+    if txt == "!play" then music:play() return end
+    if string.startWith(txt,"!volume") then 
+        vol = tonumber(string.replace(string.split(txt,"!volume")[2]," ",""))
+        if vol > 1 then vol = vol / 100 end
+        music:setVolume(vol)
+    return end
+    if string.startWith(txt,"!change") then 
+        url = string.replace(string.split(txt,"!change")[2]," ","")
+        music:destroy()
+        bass.loadURL(url,"3d noblock",function(m) play(m)end)    
+    return end
+end)
